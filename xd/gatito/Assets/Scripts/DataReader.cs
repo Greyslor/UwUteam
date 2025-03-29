@@ -44,12 +44,12 @@ public class DataReader : MonoBehaviour
 
     public void UpdateScore()
     {
-        if (manager.id == "&id=id1")
+        if (manager.id == "1")
         {
             yourScore.text = "Your Score: " + manager.data.score1.ToString();
             otherScore.text = "Other Score: " + manager.data.score2.ToString();
         }
-        else if (manager.id == "&id=id2")
+        else if (manager.id == "2")
         {
             yourScore.text = "Your Score: " + manager.data.score2.ToString();
             otherScore.text = "Other Score: " + manager.data.score1.ToString();

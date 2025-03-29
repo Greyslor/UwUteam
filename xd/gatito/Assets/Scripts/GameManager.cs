@@ -63,7 +63,7 @@ public class GameManager : MonoBehaviour
     //Acciones en el php
     IEnumerator ResetInfo()
     {
-        UnityWebRequest www = UnityWebRequest.Get("http://localhost/gato/gato.php?action=1");
+        UnityWebRequest www = UnityWebRequest.Get("http://localhost:6060/action/init");
         yield return www.Send();
 
         if (www.isNetworkError)
@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour
     IEnumerator GetInfo()
     {
         canUpdate = false;
-        UnityWebRequest www = UnityWebRequest.Get("http://localhost/gato/gato.php?action=2");
+        UnityWebRequest www = UnityWebRequest.Get("http://localhost:6060/action/status");
         yield return www.Send();
 
         if (www.isNetworkError)
@@ -108,7 +108,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SendMove()
     {
-        UnityWebRequest www = UnityWebRequest.Get("http://localhost/gato/gato.php?action=3" + id + "&pos=" + box);
+        UnityWebRequest www = UnityWebRequest.Get("http://localhost:6060/action/turn/" + id + "/" + box);
         yield return www.Send();
 
         if (www.isNetworkError)
@@ -128,7 +128,7 @@ public class GameManager : MonoBehaviour
     IEnumerator NewGame()
     {
         canUpdate = false;
-        UnityWebRequest www = UnityWebRequest.Get("http://localhost/gato/gato.php?action=4");
+        UnityWebRequest www = UnityWebRequest.Get("http://localhost:6060/action/new_game");
         yield return www.Send();
 
         if (www.isNetworkError)

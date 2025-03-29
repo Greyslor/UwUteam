@@ -1640,7 +1640,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: '&id=id2'
+          m_StringArgument: 2
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1860257050}
@@ -2486,11 +2486,11 @@ MonoBehaviour:
   playerSelection: {fileID: 221894929}
   game: {fileID: 124513470}
   data:
+    board: 000000000000000000000000000000000000000000000000000000000000000000000000
     actual: 0
     round: 0
     score1: 0
     score2: 0
-    board: 000000000000000000000000000000000000000000000000000000000000000000000000
   id: 
 --- !u!4 &701710141
 Transform:
@@ -4856,7 +4856,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: '&id=id1'
+          m_StringArgument: 1
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1860257050}

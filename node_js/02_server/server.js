@@ -24,7 +24,19 @@ app.get('/action/init', (req, res) =>{
 });
 
 app.get('/action/status/', (req, res) =>{
-    res.send('<br>Board: ' + board + '<br>Turn: ' + turn +'<br>Round: '+ round);
+    let json = {"board" : board,
+        "actual" : turn,
+        "round" : round,
+        "score1" : score1,
+        "score2" : score2,
+    }
+    res.send(JSON.stringify(json));
+});
+
+app.get('/action/new_game/', (req, res) =>{
+    board = [0,0,0,0,0,0,0,0,0];
+    turn = 0;
+    res.send('New game');
 });
 
 app.get('/action/turn/:player/:pos', (req, res) =>{
@@ -63,9 +75,11 @@ app.get('/action/turn/:player/:pos', (req, res) =>{
                     if(turn%2 == 0){
                         res.send('gano player2');
                         round++;
+                        score2++;
                     }else{
                         res.send('gano player1');
                         round++;
+                        score1++;
                     }
                 }else if(turn == 9){
                     res.send('empate unu')
@@ -82,4 +96,3 @@ app.get('/action/turn/:player/:pos', (req, res) =>{
 app.listen(port,() =>{
     console.log(`server init: ${port}`);
 });
-
