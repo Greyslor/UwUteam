@@ -1,0 +1,14 @@
+{
+  "name": "node_websockets",
+  "version": "0.0.1",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+
+  "author": "UwUteam",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.18.1"
+  }
+}
