@@ -5,10 +5,11 @@
   "scripts": {
     "start": "nodemon server.js"
   },
-
   "author": "UwUteam",
   "license": "ISC",
   "dependencies": {
+    "node_websockets": "file:",
+    "nodemon": "^3.1.9",
     "ws": "^8.18.1"
   }
 }

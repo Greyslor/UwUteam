@@ -1,75 +1,73 @@
 const WebSocket = require('ws');
-const clients = [];
+const server = new WebSocket.Server({ port: 8080 });
 
-class Cliente{
-	constructor()
-	{
-		this._username="No name";
-	}
+let clients = {};
+let board = ["", "", "", "", "", "", "", "", ""];
+let turn = "jugador1";
 
-	set username( user )
-	{
-		this._username = user;
-	}
-
-	get username ()
-	{
-		return this._username;
-	}
+function checkWinner() {
+  const combos = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+  ];
+  for (let c of combos) {
+    const [a, b, c2] = c;
+    if (board[a] && board[a] === board[b] && board[a] === board[c2]) {
+      return board[a];
+    }
+  }
+  return board.includes("") ? null : "empate";
 }
 
-const wss = new WebSocket.Server({ port: 8080 },()=>{
-    console.log('Server Started');
+function broadcastGameState() {
+  const winner = checkWinner();
+  const state = {
+    type: "update",
+    status: 200,
+    board,
+    turn,
+    winner
+  };
+  const message = JSON.stringify(state);
+  for (const id in clients) {
+    clients[id].send(message);
+  }
+}
+
+server.on('connection', socket => {
+  let playerId = null;
+
+  socket.on('message', data => {
+    try {
+      const msg = JSON.parse(data);
+
+      if (msg.type === "join") {
+        playerId = msg.player;
+        clients[playerId] = socket;
+        console.log(playerId + " conectado");
+        broadcastGameState();
+      }
+
+      if (msg.type === "move" && msg.player === turn) {
+        const box = msg.box;
+        if (board[box] === "") {
+          board[box] = msg.player;
+          turn = (turn === "jugador1") ? "jugador2" : "jugador1";
+          broadcastGameState();
+        } else {
+          socket.send(JSON.stringify({ type: "error", status: 203, message: "Casilla ocupada" }));
+        }
+      }
+    } catch (e) {
+      console.error("Error al procesar mensaje:", e);
+    }
+  });
+
+  socket.on('close', () => {
+    console.log(playerId + " desconectado");
+    delete clients[playerId];
+  });
 });
 
-wss.on('connection', function connection(ws) {
-	
-	console.log('New connenction');
-	clients.push(ws); // Agregar la conexión (cliente) a la lista
-
-	let cliente = new Cliente ();
-	
-    ws.on('open', (data) => {
-		console.log('Now Open');
-	});
-
-	ws.on('message', (data) => {
-		console.log('Data received: %s',data);
-		
-		//ws.send("The server response: "+data); // Para mandar el mensaje al cliente que lo envió
-
-		let info = data.toString().split('|');
-
-		switch (info[0])
-		{
-			case '200':
-				cliente.username = info[1];
-				ws.send("UserName upDated: "+cliente.username);
-				break;
-			
-				default:
-					// Mandar a todos los clientes conectados el mensaje con el username de quien lo envió
-					clients.forEach(client => {
-						if(client.readyState === WebSocket.OPEN)
-						{
-							client.send(cliente.username + " says: " + data); // si falla, cambiar a: `data.toString()`
-						}
-					});
-					break;
-		}
-	});
-
-	// Al cerrar la conexión, quitar de la lista de clientes
-	ws.on('close', () => { 
-		let index = clients.indexOf(ws);
-		if(index > -1)
-		{
-			clients.splice(index, 1);
-			ws.send("UserName disconnected: "+cliente.username);
-		}
-	});
-});
-
-wss.on('listening',()=>{
-   console.log('Now listening on port 8080...');
-});
+console.log("Servidor WebSocket corriendo en ws://localhost:8080");

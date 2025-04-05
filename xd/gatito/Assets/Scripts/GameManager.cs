@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,7 +12,7 @@ public class GameManager : MonoBehaviour
     public GameObject playerSelection;
     public GameObject game;
 
-    [Header ("Data Base")]
+    [Header("Data Base")]
     public GatoData data;
     public string id;
     private int box;
@@ -19,6 +21,13 @@ public class GameManager : MonoBehaviour
     public GotData onGotData;
 
     private bool canUpdate = true;
+
+    public WebSocketManager wsManager;
+
+    public Button[] casillas;
+
+    public TextMeshProUGUI[] casillaTextos;
+
     void Start()
     {
         StopAllCoroutines();
@@ -31,7 +40,6 @@ public class GameManager : MonoBehaviour
         id = idInput;
         playerSelection.SetActive(false);
         game.SetActive(true);
-
     }
 
     private void Update()
@@ -60,6 +68,39 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ResetInfo());
     }
 
+    public void UpdateBoard(GameMessage msg)
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            string contenido = msg.board[i];
+            if (contenido == "jugador_1")
+            {
+                casillaTextos[i].text = "X";
+            }
+            else if (contenido == "jugador_2")
+            {
+                casillaTextos[i].text = "O";
+            }
+            else
+            {
+                casillaTextos[i].text = "";
+            }
+        }
+
+        if (!string.IsNullOrEmpty(msg.winner))
+        {
+            if (msg.winner == "empate")
+                Debug.Log("¡Empate!");
+            else
+                Debug.Log("¡Ganó " + msg.winner + "!");
+        }
+    }
+
+    public void AlHacerClick(int indice)
+    {
+        wsManager.SendMove(indice);
+    }
+
     //Acciones en el php
     IEnumerator ResetInfo()
     {
@@ -73,7 +114,6 @@ public class GameManager : MonoBehaviour
         else
         {
             print("Database reset");
-
 
             // Or retrieve results as binary data
             byte[] results = www.downloadHandler.data;
@@ -97,7 +137,6 @@ public class GameManager : MonoBehaviour
             data = JsonUtility.FromJson<GatoData>(json);
             print(data);
 
-
             // Or retrieve results as binary data
             byte[] results = www.downloadHandler.data;
         }
@@ -117,10 +156,9 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            print(www.downloadHandler.text);
-
-
             // Or retrieve results as binary data
+
+            print(www.downloadHandler.text);
             byte[] results = www.downloadHandler.data;
         }
     }
@@ -138,7 +176,6 @@ public class GameManager : MonoBehaviour
         else
         {
             print("New Game");
-
 
             // Or retrieve results as binary data
             byte[] results = www.downloadHandler.data;
