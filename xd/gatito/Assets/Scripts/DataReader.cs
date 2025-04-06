@@ -37,7 +37,7 @@ public class DataReader : MonoBehaviour
             {
                 boardBoxes[i].text = "";
             }
-            Debug.Log(string.Join(",", manager.data.board));
+            //Debug.Log(string.Join(",", manager.data.board));
         }
         UpdateScore();
     }

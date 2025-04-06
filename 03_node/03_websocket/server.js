@@ -1,73 +1,135 @@
 const WebSocket = require('ws');
-const server = new WebSocket.Server({ port: 8080 });
+const clients = [];
 
-let clients = {};
-let board = ["", "", "", "", "", "", "", "", ""];
-let turn = "jugador1";
-
-function checkWinner() {
-  const combos = [
-    [0,1,2], [3,4,5], [6,7,8],
-    [0,3,6], [1,4,7], [2,5,8],
-    [0,4,8], [2,4,6]
-  ];
-  for (let c of combos) {
-    const [a, b, c2] = c;
-    if (board[a] && board[a] === board[b] && board[a] === board[c2]) {
-      return board[a];
-    }
-  }
-  return board.includes("") ? null : "empate";
+class Cliente {
+	constructor(ws) {
+		this.ws = ws;
+		this.username = "No name";
+		this.id = null; // "1" o "2"
+	}
 }
 
-function broadcastGameState() {
-  const winner = checkWinner();
-  const state = {
-    type: "update",
-    status: 200,
-    board,
-    turn,
-    winner
-  };
-  const message = JSON.stringify(state);
-  for (const id in clients) {
-    clients[id].send(message);
-  }
-}
+let gameData = {
+	board: Array(9).fill(0),
+	actual: 1,
+	round: 1,
+	score1: 0,
+	score2: 0
+};
 
-server.on('connection', socket => {
-  let playerId = null;
-
-  socket.on('message', data => {
-    try {
-      const msg = JSON.parse(data);
-
-      if (msg.type === "join") {
-        playerId = msg.player;
-        clients[playerId] = socket;
-        console.log(playerId + " conectado");
-        broadcastGameState();
-      }
-
-      if (msg.type === "move" && msg.player === turn) {
-        const box = msg.box;
-        if (board[box] === "") {
-          board[box] = msg.player;
-          turn = (turn === "jugador1") ? "jugador2" : "jugador1";
-          broadcastGameState();
-        } else {
-          socket.send(JSON.stringify({ type: "error", status: 203, message: "Casilla ocupada" }));
-        }
-      }
-    } catch (e) {
-      console.error("Error al procesar mensaje:", e);
-    }
-  });
-
-  socket.on('close', () => {
-    console.log(playerId + " desconectado");
-    delete clients[playerId];
-  });
+const wss = new WebSocket.Server({ port: 8080 }, () => {
+	console.log('Server Started');
 });
 
-console.log("Servidor WebSocket corriendo en ws://localhost:8080");
+wss.on('connection', function connection(ws) {
+	console.log('New connection');
+	let cliente = new Cliente(ws);
+	clients.push(cliente);
+
+	// Asignar ID de jugador
+	const currentPlayers = clients.filter(c => c.id !== null).length;
+	if (currentPlayers < 2) {
+		cliente.id = (currentPlayers + 1).toString();
+	}
+
+	ws.on('message', (data) => {
+		const message = data.toString();
+		console.log("Received:", message);
+
+		try {
+			const json = JSON.parse(message);
+
+			switch (json.type) {
+				case 'set_username':
+					cliente.username = json.username;
+					broadcast({ type: "system", message: `${cliente.username} se ha unido.` });
+					break;
+
+				case 'chat':
+					broadcast({ type: 'chat', username: cliente.username, message: json.message });
+					break;
+
+				case 'new_game':
+					resetGame();
+					broadcastGameData();
+					break;
+
+				case 'turn':
+					handleTurn(cliente.id, json.box);
+					break;
+
+				case 'get_status':
+					if (gameData.actual.toString() !== cliente.id) {
+            sendToClient(cliente, { type: "status", data: gameData });
+          }
+          break;
+			}
+		} catch (err) {
+			console.error("Invalid JSON:", err);
+		}
+	});
+
+	ws.on('close', () => {
+		const index = clients.indexOf(cliente);
+		if (index > -1) clients.splice(index, 1);
+		console.log(`${cliente.username} disconnected`);
+	});
+});
+
+function handleTurn(playerId, box) {
+	box = parseInt(box);
+	if (gameData.board[box] === 0 && gameData.actual.toString() === playerId) {
+		gameData.board[box] = parseInt(playerId);
+		gameData.actual = gameData.actual === 1 ? 2 : 1;
+
+		// verificar si hay ganador
+		if (checkWinner(parseInt(playerId))) {
+			if (playerId === "1") gameData.score1++;
+			else gameData.score2++;
+
+			gameData.round++;
+			gameData.board = Array(9).fill(0);
+		}
+
+		broadcastGameData();
+	}
+}
+
+function checkWinner(player) {
+	const wins = [
+		[0, 1, 2], [3, 4, 5], [6, 7, 8],
+		[0, 3, 6], [1, 4, 7], [2, 5, 8],
+		[0, 4, 8], [2, 4, 6]
+	];
+
+	return wins.some(combo => combo.every(i => gameData.board[i] === player));
+}
+
+function resetGame() {
+	gameData = {
+		board: Array(9).fill(0),
+		actual: 1,
+		round: 1,
+		score1: 0,
+		score2: 0
+	};
+}
+
+function broadcast(data) {
+	const str = JSON.stringify(data);
+	clients.forEach(c => {
+		if (c.ws.readyState === WebSocket.OPEN) {
+			c.ws.send(str);
+		}
+	});
+}
+
+function broadcastGameData() {
+	broadcast({ type: "status", data: gameData });
+}
+
+function sendToClient(cliente, data) {
+	if (cliente.ws.readyState === WebSocket.OPEN) {
+		cliente.ws.send(JSON.stringify(data));
+	}
+}
