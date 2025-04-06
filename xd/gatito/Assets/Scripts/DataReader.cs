@@ -11,17 +11,7 @@ public class DataReader : MonoBehaviour
     public TextMeshProUGUI otherScore;
     public TextMeshProUGUI round;
 
-    private void OnEnable()
-    {
-        manager.onGotData += UpdateBoard;
-    }
-
-    private void OnDisable()
-    {
-        manager.onGotData -= UpdateBoard;
-    }
-
-    public void UpdateBoard()
+    public void Update()
     {
         for (int i = 0; i < manager.data.board.Length; i++)
         {

@@ -54,6 +54,7 @@ public class Chat : MonoBehaviour
                     if (newStatus != lastStatusMessage)
                     {
                         Debug.Log("Recibido nuevo estado: " + newStatus);
+                        manager.data = JsonUtility.FromJson<GatoData>(newStatus);
                         lastStatusMessage = newStatus;  // Actualizar el último estado
                     }
                     break;
