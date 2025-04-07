@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -7,6 +8,7 @@ public class GameManager : MonoBehaviour
     public GameObject playerSelection;
     public GameObject game;
     public Chat chat;
+    public TextMeshProUGUI winner;
 
     [Header("Data Base")]
     public GatoData data;

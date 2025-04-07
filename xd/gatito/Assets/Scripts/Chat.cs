@@ -61,6 +61,10 @@ public class Chat : MonoBehaviour
                 case "system":
                     Debug.Log("System message: " + packet.message);
                     break;
+                case "winner":
+                    manager.winner.text = "Gana Player " + packet.message;
+                    break;
+
             }
         };
 

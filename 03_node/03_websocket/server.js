@@ -87,8 +87,10 @@ function handleTurn(playerId, box) {
 			if (playerId === "1") gameData.score1++;
 			else gameData.score2++;
 
-			gameData.round++;
-			gameData.board = Array(9).fill(0);
+			broadcast({"type":"winner","message":playerId});
+
+			//gameData.round++;
+			//gameData.board = Array(9).fill(0);
 		}
 
 		broadcastGameData();
@@ -125,7 +127,7 @@ function broadcast(data) {
 }
 
 function broadcastGameData() {
-	broadcast({ type: "status", data: gameData });
+	broadcast({ type: "status", data: gameData }); 
 }
 
 function sendToClient(cliente, data) {

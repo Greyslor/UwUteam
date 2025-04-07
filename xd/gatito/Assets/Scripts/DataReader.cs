@@ -10,9 +10,11 @@ public class DataReader : MonoBehaviour
     public TextMeshProUGUI yourScore;
     public TextMeshProUGUI otherScore;
     public TextMeshProUGUI round;
+    public TextMeshProUGUI player;
 
     public void Update()
     {
+        player.text = "Eres el jugador: " + manager.id;
         for (int i = 0; i < manager.data.board.Length; i++)
         {
             if (manager.data.board[i] == 1)
