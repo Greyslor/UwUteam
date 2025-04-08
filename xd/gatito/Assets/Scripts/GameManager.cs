@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public string id;
     private int box;
 
+
     public delegate void GotData();
     public GotData onGotData;
 

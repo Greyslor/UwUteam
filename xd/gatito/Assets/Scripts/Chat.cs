@@ -62,8 +62,13 @@ public class Chat : MonoBehaviour
                     Debug.Log("System message: " + packet.message);
                     break;
                 case "winner":
-                    manager.winner.text = "Gana Player " + packet.message;
+
+                    if (packet.message == manager.id)
+                        manager.winner.text = "U WIN";
+                    else
+                        manager.winner.text = "Loser";
                     break;
+
 
             }
         };

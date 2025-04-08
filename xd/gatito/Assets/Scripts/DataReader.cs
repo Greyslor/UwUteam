@@ -14,7 +14,7 @@ public class DataReader : MonoBehaviour
 
     public void Update()
     {
-        player.text = "Eres el jugador: " + manager.id;
+        player.text = "You are the player: " + manager.id;
         for (int i = 0; i < manager.data.board.Length; i++)
         {
             if (manager.data.board[i] == 1)
