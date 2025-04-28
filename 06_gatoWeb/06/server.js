@@ -1,12 +1,48 @@
 const WebSocket = require('ws');
 const uss = [];
 const users = [];
+const activeGames = [];
+
+class Game{
+	constructor()
+	{
+		this.board=[0,0,0,0,0,0,0,0,0];
+		this.round=1;
+		this.turn=1;
+		this.score1=0;
+		this.score2=0;
+		this.player1="";
+		this.player2="";
+	}
+}
 
 class User{
 	constructor()
 	{
 		this._username="none";
-		this._conn=null;
+		this._player = 0;
+		this._inGame = false;
+		this._conn = null;
+	}
+
+	set player ( user )
+	{
+		this._player = user;
+	}
+
+	get player ()
+	{
+		return this._player;
+	}
+
+	set inGame ( state )
+	{
+		this._inGame = state;
+	}
+
+	get inGame ()
+	{
+		return this._inGame;
 	}
 
 	set username( user )
@@ -41,6 +77,62 @@ class User{
 	}
 }
 
+function checkwin( game, users){
+	if(game.board[0] == game.board[1] && game.board[1] == game.board[2] && game.board[0] != 0 ||
+		game.board[3] == game.board[4] && game.board[4] == game.board[5] && game.board[3] != 0 ||
+		game.board[6] == game.board[7] && game.board[7] == game.board[8] && game.board[6] != 0 ||
+		game.board[0] == game.board[3] && game.board[3] == game.board[6] && game.board[0] != 0 ||
+		game.board[1] == game.board[4] && game.board[4] == game.board[7] && game.board[1] != 0 ||
+		game.board[2] == game.board[5] && game.board[5] == game.board[8] && game.board[2] != 0 ||
+		game.board[0] == game.board[4] && game.board[4] == game.board[8] && game.board[0] != 0 ||
+		game.board[2] == game.board[4] && game.board[4] == game.board[6] && game.board[2] != 0){
+			if(game.turn%2 == 0){
+				users.forEach(us => {
+					if(us.username === game.player1 || us.username === game.player2)
+					{
+						us.connection.send("501|Player 1 wins");
+					}
+				});
+			}
+			else{
+				users.forEach(us => {
+					if(us.username === game.player1 || us.username === game.player2)
+					{
+						us.connection.send("501|Player 2 wins");
+					}
+				});
+			}
+	}
+	else if(game.turn > 9){
+		users.forEach(us => {
+			if(us.username === game.player1 || us.username === game.player2)
+			{
+				us.connection.send("501|Draw");
+			}
+		});
+	}
+}
+
+function checkturn(game, user, pos){
+	if(game.turn % 2 == user.player % 2){
+		if(pos > -1 && pos < 9) {
+			if(game.board[pos] == 0){
+				game.board[pos] = user.player;
+				game.turn += 1;
+			}
+			else{
+				user.connection.send("501|invalid move");
+			}
+		}
+		else{
+			user.connection.send("501|invalid move");
+		}
+	}
+	else {
+		user.connection.send("501|not your turn");
+	}
+}
+
 const wss = new WebSocket.Server({ port: 8080 },()=>{
     console.log('Server Started');
 });
@@ -64,6 +156,7 @@ wss.on('connection', function connection(ws) {
 		//ws.send("The server response: "+data); // Para mandar el mensaje al use que lo envió
 
 		let info = data.toString().split('|');
+		let u=true;
 
 		switch (info[0])
 		{
@@ -82,45 +175,80 @@ wss.on('connection', function connection(ws) {
 					user.connection.send("200|OKAY");
 
 				}
-
 				else{
 					user.connection.send("200|NO")
 				}
 
 				break;
 				
-			
 			case '300':
 				let lista = [];
 				users.forEach(us => {
 					if(us.connection.readyState === WebSocket.OPEN)
 					{
-						if(!(us.username === "none")){
+						if(!(us.username === "none" && us.inGame === false)){
 							lista.push(us.username);
 						}
 					}
 				});
 
-				let json = "{'\"Users\""+JSON.stringify(lista)+"}"
+				let json = "{\"Users\" : "+JSON.stringify(lista)+"}"
 
 				user.connection.send(json);
 
 				break;
 
-			case '400':
-				let u=true;
+			case '401':
 
 				users.forEach(us => {
 					if(us.username === info[1])
 					{
 						u=false;
-						us.connection.send("400|" + user.username + info[2]);
+						us.connection.send("401|" + user.username);
+
 					}
 				});
 
 				if(u == true){
 					user.connection.send("404|User not found");
 				}
+				break;
+
+			case '402':
+				users.forEach(us => {
+					if(us.username === info[1])
+					{
+						u=false;
+
+						if(info[2] == "YES"){
+							user.player = 1;
+							us.player = 2;
+							let game = new Game();
+							game.player1 = user.username;
+							game.player2 = us.username;
+							activeGames.push(game);
+							us.connection.send("402|" + us.username + "|game accepted");
+						}
+						else if(info[2] == "NO"){
+							us.connection.send("402|" + us.username + "|game denied");
+						}
+					}
+				});
+
+				if(u == true){
+					user.connection.send("404|User not found");
+				}
+				break;
+
+			case '501':
+				activeGames.forEach(gm => {
+					if(gm.player1 == user.username || gm.player2 == user.username){
+						checkturn(gm, user, parseInt(info[1]));
+						checkwin(gm, users);
+					}
+				});
+				console.log(activeGames);
+
 				break;
 
 			case '404':
