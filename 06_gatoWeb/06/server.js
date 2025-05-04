@@ -140,6 +140,26 @@ function checkturn(game, user, pos){
 	else {
 		user.connection.send("501|not your turn");
 	}
+	sendGameStatus(game, users);
+}
+
+function sendGameStatus(game, users) {
+	const message = JSON.stringify({
+		type: "status",
+		data: {
+			board: game.board,
+			score1: game.score1,
+			score2: game.score2,
+			round: game.round,
+			actual: game.turn % 2 === 1 ? 1 : 2
+		}
+	});
+
+	users.forEach(us => {
+		if (us.username === game.player1 || us.username === game.player2) {
+			us.connection.send(message);
+		}
+	});
 }
 
 const wss = new WebSocket.Server({ port: 8080 },()=>{
@@ -148,7 +168,7 @@ const wss = new WebSocket.Server({ port: 8080 },()=>{
 
 wss.on('connection', function connection(ws) {
 	
-	console.log('New connenction');
+	console.log('New connection');
 	let user = new User ();
 	user.connection = ws;
 	users.push(user); // Agregar la conexión (use) a la lista
@@ -259,6 +279,7 @@ wss.on('connection', function connection(ws) {
 					if(gm.player1 == user.username || gm.player2 == user.username){
 						checkturn(gm, user, parseInt(info[1]));
 						checkwin(gm, users);
+						sendGameStatus(gm, users);
 					}
 				});
 				console.log(activeGames);
