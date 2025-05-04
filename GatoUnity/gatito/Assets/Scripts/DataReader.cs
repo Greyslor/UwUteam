@@ -12,7 +12,7 @@ public class DataReader : MonoBehaviour
     public TextMeshProUGUI round;
     public TextMeshProUGUI player;
 
-    public void Update()
+    public void RefreshUI()
     {
         player.text = "You are the player: " + manager.id;
         for (int i = 0; i < manager.data.board.Length; i++)
@@ -30,6 +30,7 @@ public class DataReader : MonoBehaviour
                 boardBoxes[i].text = "";
             }
             //Debug.Log(string.Join(",", manager.data.board));
+
         }
         UpdateScore();
     }

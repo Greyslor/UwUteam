@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -49,21 +49,23 @@ public class Chat : MonoBehaviour
                     if (packet.type == "status")
                     {
                         string newStatus = JsonUtility.ToJson(packet.data);
+
                         if (newStatus != lastStatusMessage)
                         {
-                            manager.data = packet.data;
-
+                            Debug.Log("Recibido nuevo estado: " + newStatus);
+                            manager.data = JsonUtility.FromJson<GatoData>(newStatus);
                             lastStatusMessage = newStatus;
-
-                            Debug.Log("Tablero actualizado: " + string.Join(",", manager.data.board));
+                            manager.GetComponent<DataReader>().RefreshUI();
                         }
                     }
+
                 }
                 catch (Exception ex)
                 {
                     Debug.Log("Error al leer JSON: " + ex.Message);
                 }
             }
+
             else
             {
                 string[] parts = message.Split('|');
@@ -74,6 +76,7 @@ public class Chat : MonoBehaviour
                 {
                     case "501":
                         manager.winner.text = content;
+                        manager.GetComponent<DataReader>().RefreshUI();
                         break;
 
                     case "503":
@@ -84,7 +87,7 @@ public class Chat : MonoBehaviour
                         }
                         else if (content == "GAME CLOSED")
                         {
-                            Debug.Log("El oponente termin� el juego");
+                            Debug.Log("El oponente terminó el juego");
                         }
                         break;
 
@@ -96,8 +99,12 @@ public class Chat : MonoBehaviour
                         Debug.Log("Partida iniciada");
                         break;
 
+                    case "504":
+                        Debug.LogWarning("Movimiento inválido: " + content);
+                        break;
+
                     case "401":
-                        Debug.Log("Invitaci�n recibida de: " + content);
+                        Debug.Log("Invitación recibida de: " + content);
                         break;
 
                     default:

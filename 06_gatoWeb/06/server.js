@@ -122,7 +122,7 @@ function checkwin( game, users){
 	}
 }
 
-function checkturn(game, user, pos){
+function checkturn(game, user, pos, users){
 	if(game.turn % 2 == user.player % 2){
 		if(pos > -1 && pos < 9) {
 			if(game.board[pos] == 0){
@@ -190,25 +190,42 @@ wss.on('connection', function connection(ws) {
 		switch (info[0])
 		{
 			case '200':
-				let found = false;
-				users.forEach(us => {
-					if(us.username === info[1])
-					{
-						found = true;
-					}
-				});
+	let found = false;
+	users.forEach(us => {
+		if(us.username === info[1])
+		{
+			found = true;
+		}
+	});
 
-				if(!found)
-				{
-					user.username = info[1];
-					user.connection.send("200|OKAY");
+	if(!found)
+	{
+		user.username = info[1];
+		user.connection.send("200|OKAY");
 
-				}
-				else{
-					user.connection.send("200|NO")
-				}
+		// CREA JUEGO AUTOMÁTICO PARA 2 USUARIOS
+		let p1 = users.find(u => u.username !== "none" && u.username !== user.username && !u.inGame);
+		if (p1) {
+			user.player = 2;
+			p1.player = 1;
+			user.inGame = true;
+			p1.inGame = true;
 
-				break;
+			let game = new Game();
+			game.player1 = p1.username;
+			game.player2 = user.username;
+			activeGames.push(game);
+
+			p1.connection.send("500|game started");
+			user.connection.send("500|game started");
+			sendGameStatus(game, users);
+		}
+	}
+	else{
+		user.connection.send("200|NO")
+	}
+	break;
+
 				
 			case '300':
 				let lista = [];
@@ -277,7 +294,7 @@ wss.on('connection', function connection(ws) {
 			case '501':
 				activeGames.forEach(gm => {
 					if(gm.player1 == user.username || gm.player2 == user.username){
-						checkturn(gm, user, parseInt(info[1]));
+						checkturn(gm, user, parseInt(info[1]), users);
 						checkwin(gm, users);
 						sendGameStatus(gm, users);
 					}

@@ -30,6 +30,12 @@ public class GameManager : MonoBehaviour
 
     public void SelectId(string idInput)
     {
+        if (idInput != "1" && idInput != "2")
+        {
+            Debug.LogWarning("Jugador inválido debe ser '1' o '2'.");
+            return;
+        }
+
         id = idInput;
         playerSelection.SetActive(false);
         game.SetActive(true);
@@ -49,14 +55,14 @@ public class GameManager : MonoBehaviour
 
     IEnumerator EnableUpdateDelay()
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(3f);
         canUpdate = true;
     }
 
     public void PlayerMove(int boxInput)
     {
-        box = boxInput;
-        chat.SendMove(box);
+        if (data.board[boxInput] != 0) return; // ya ocupado
+        chat.SendMove(boxInput);
     }
 
     [ContextMenu("newGame")]
