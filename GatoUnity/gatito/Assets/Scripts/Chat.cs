@@ -54,7 +54,9 @@ public class Chat : MonoBehaviour
                         {
                             Debug.Log("Recibido nuevo estado: " + newStatus);
                             manager.data = JsonUtility.FromJson<GatoData>(newStatus);
+                            
                             lastStatusMessage = newStatus;
+                            
                             manager.GetComponent<DataReader>().RefreshUI();
                         }
                     }

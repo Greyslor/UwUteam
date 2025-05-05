@@ -2207,7 +2207,7 @@ MonoBehaviour:
           m_StringArgument: 2
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1860257050}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: DataReader, Assembly-CSharp
         m_MethodName: UpdateBoard
         m_Mode: 1
@@ -3760,6 +3760,7 @@ GameObject:
   m_Component:
   - component: {fileID: 701710141}
   - component: {fileID: 701710140}
+  - component: {fileID: 701710142}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -3805,6 +3806,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1426252419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &701710142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 701710139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb1ec4d24d77a0c438deed606e863651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  manager: {fileID: 701710140}
+  boardBoxes:
+  - {fileID: 647375333}
+  - {fileID: 462608779}
+  - {fileID: 373898488}
+  - {fileID: 1158527172}
+  - {fileID: 908537799}
+  - {fileID: 2109952300}
+  - {fileID: 1469210754}
+  - {fileID: 354634360}
+  - {fileID: 1537939504}
+  yourScore: {fileID: 509450405}
+  otherScore: {fileID: 334785988}
+  round: {fileID: 42505327}
+  player: {fileID: 2114560612}
 --- !u!1 &749988211
 GameObject:
   m_ObjectHideFlags: 0
@@ -5490,7 +5518,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1860257050}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: DataReader, Assembly-CSharp
         m_MethodName: UpdateBoard
         m_Mode: 1
@@ -6814,7 +6842,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1860257049}
-  - component: {fileID: 1860257050}
   m_Layer: 0
   m_Name: DataReader
   m_TagString: Untagged
@@ -6837,33 +6864,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1426252419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1860257050
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1860257048}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb1ec4d24d77a0c438deed606e863651, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  manager: {fileID: 701710140}
-  boardBoxes:
-  - {fileID: 647375333}
-  - {fileID: 462608779}
-  - {fileID: 373898488}
-  - {fileID: 1158527172}
-  - {fileID: 908537799}
-  - {fileID: 2109952300}
-  - {fileID: 1469210754}
-  - {fileID: 354634360}
-  - {fileID: 1537939504}
-  yourScore: {fileID: 509450405}
-  otherScore: {fileID: 334785988}
-  round: {fileID: 42505327}
-  player: {fileID: 2114560612}
 --- !u!1 &1886457910
 GameObject:
   m_ObjectHideFlags: 0
@@ -8277,7 +8277,7 @@ MonoBehaviour:
           m_StringArgument: 1
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1860257050}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: DataReader, Assembly-CSharp
         m_MethodName: UpdateBoard
         m_Mode: 1
