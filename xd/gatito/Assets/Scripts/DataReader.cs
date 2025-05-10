@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class DataReader : MonoBehaviour
 {
-    public GameManager manager;
+    public GameManagerg2 manager;
     public TextMeshProUGUI[] boardBoxes;
     public TextMeshProUGUI yourScore;
     public TextMeshProUGUI otherScore;
@@ -14,7 +14,7 @@ public class DataReader : MonoBehaviour
 
     public void Update()
     {
-        player.text = "You are the player: " + manager.id;
+        player.text = "You are the player: " + manager.data.userID;
         for (int i = 0; i < manager.data.board.Length; i++)
         {
             if (manager.data.board[i] == 1)
@@ -36,12 +36,12 @@ public class DataReader : MonoBehaviour
 
     public void UpdateScore()
     {
-        if (manager.id == "1")
+        if (manager.data.userID == "1")
         {
             yourScore.text = "Your Score: " + manager.data.score1.ToString();
             otherScore.text = "Other Score: " + manager.data.score2.ToString();
         }
-        else if (manager.id == "2")
+        else if (manager.data.userID == "2")
         {
             yourScore.text = "Your Score: " + manager.data.score2.ToString();
             otherScore.text = "Other Score: " + manager.data.score1.ToString();

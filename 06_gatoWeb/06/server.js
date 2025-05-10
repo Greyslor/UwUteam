@@ -95,8 +95,8 @@ function checkwin( game, users){
 					if(us.username === game.player1 || us.username === game.player2)
 					{
 						game.roundEnded = true;
-						us.connection.send("501|Player 1 wins");
-						us.connection.send("502|REPLAY");
+						us.connection.send("503|1");
+						us.connection.send("502|");
 					}
 				});
 			}
@@ -106,8 +106,8 @@ function checkwin( game, users){
 					if(us.username === game.player1 || us.username === game.player2)
 					{
 						game.roundEnded = true;
-						us.connection.send("501|Player 2 wins");
-						us.connection.send("502|REPLAY");
+						us.connection.send("503|2");
+						us.connection.send("502|");
 					}
 				});
 			}
@@ -175,10 +175,11 @@ wss.on('connection', function connection(ws) {
 					if(us.username === info[1])
 					{
 						found = true;
+						user.connection = us.connection;
 					}
 				});
 
-				if(!found)
+				if(!found && info[1]!= "")
 				{
 					user.username = info[1];
 					user.connection.send("200|OKAY");
@@ -188,6 +189,15 @@ wss.on('connection', function connection(ws) {
 					user.connection.send("200|NO")
 				}
 
+				users.forEach(us => {
+					if(us.connection.readyState === WebSocket.OPEN)
+					{
+						if(us.username != user.username)
+						{
+							us.connection.send("504|"); // si falla, cambiar a: `data.toString()`
+						}
+					}
+				});
 				break;
 				
 			case '300':
@@ -201,7 +211,7 @@ wss.on('connection', function connection(ws) {
 					}
 				});
 
-				let json = "{\"Users\" : "+JSON.stringify(lista)+"}"
+				let json = "300|"+lista
 
 				user.connection.send(json);
 
@@ -214,7 +224,6 @@ wss.on('connection', function connection(ws) {
 					{
 						u=false;
 						us.connection.send("401|" + user.username);
-						user.connection.send("401|Awaiting response");
 
 					}
 				});
@@ -239,12 +248,19 @@ wss.on('connection', function connection(ws) {
 							game.player1 = user.username;
 							game.player2 = us.username;
 							activeGames.push(game);
-							us.connection.send("402|" + user.username + "|game accepted");
-							us.connection.send("500|game started");
-							user.connection.send("500|game started");
+							us.connection.send("402|" + user.username + "|YES");
+							users.forEach(us => {
+								if(us.connection.readyState === WebSocket.OPEN)
+								{
+									if(us.username != user.username)
+									{
+										us.connection.send("504|"); // si falla, cambiar a: `data.toString()`
+									}
+								}
+							});
 						}
 						else if(info[2] == "NO"){
-							us.connection.send("402|" + user.username + "|game denied");
+							us.connection.send("402|" + user.username + "|NO");
 						}
 					}
 				});
@@ -253,6 +269,15 @@ wss.on('connection', function connection(ws) {
 					user.connection.send("404|User not found");
 				}
 				break;
+			case '500':
+				activeGames.forEach(gm => {
+					if(gm.player1 == user.username || gm.player2 == user.username){
+						var json = '{"userID":"'+user.player+'","board":['+gm.board+'],'+'"round":"'+gm.round+'",'+'"turn":"'+gm.turn+'",'+'"score1":"'+gm.score1+'",'+'"score2":"'+gm.score2+'",'+'"player1":"'+gm.player1+'",'+'"player2":"'+gm.player2+'",'+'"roundEnded":"'+gm.roundEnded+'",'+'"replay1":"'+gm.replay1+'",'+'"replay2":"'+gm.replay2+'"}'
+						console.log(json);
+						user.connection.send("500|"+ json);
+					}
+				});
+				break;
 
 			case '501':
 				activeGames.forEach(gm => {
@@ -260,56 +285,32 @@ wss.on('connection', function connection(ws) {
 						checkturn(gm, user, parseInt(info[1]));
 						checkwin(gm, users);
 					}
+					users.forEach(us => {
+						if(us.username == gm.player1 || us.username == gm.player2)
+						{
+							us.connection.send("505|");
+						}
+					});
 				});
-				console.log(activeGames);
-
 				break;
-
-			case '503':
+			
+			case '502':
+				user.inGame = false;
+				user.player = 0;
 				activeGames.forEach(gm => {
 					if(gm.player1 == user.username || gm.player2 == user.username){
-						if(gm.player1 == user.username ){
-							gm.replay1 == info[1]
-							if(gm.replay1 == "YES"){
-								if(gm.replay2 == "YES"){
-									users.forEach(us => {
-										if(us.username === gm.player1 || us.username === gm.player2)
-										{
-											us.connection.send("503|REPLAY ACCEPTED");
-											if(us.player == 1){
-												us.player = 2;
-											}
-											else if(us.player == 2){
-												us.player = 1;
-											}
-										}
-									});
-									gm.board = [0,0,0,0,0,0,0,0,0];
-									gm.round += 1;
-									gm.roundEnded = false;
-								}
-								else if(gm.replay2 == ""){
-									user.connection.send("503|awaiting response");
-								}
-							}
-							else if(gm.replay1 == "NO"){
-								users.forEach(us => {
-									if(us.username === game.player1 || us.username === game.player2)
-									{
-										us.connection.send("503|GAME CLOSED");
-										us.inGame = false;
-										us.player = 0;
-									}
-								});
-								activeGames.splice(activeGames.indexOf(gm), 1);
-							}
-						}
-						else if(gm.player2 == user.username ){
-
+						activeGames.splice(activeGames.indexOf(gm), 1);
+					}
+				});
+				users.forEach(us => {
+					if(us.connection.readyState === WebSocket.OPEN)
+					{
+						if(us.username != user.username)
+						{
+							us.connection.send("504|"); // si falla, cambiar a: `data.toString()`
 						}
 					}
 				});
-	
 				break;
 
 			case '404':
@@ -332,8 +333,17 @@ wss.on('connection', function connection(ws) {
 		let index = users.indexOf(user);
 		if(index > -1)
 		{
-			uss.splice(index, 1);
-			user.connection.send("UserName disconnected: "+user.username);
+			users.forEach(us => {
+				if(us.connection.readyState === WebSocket.OPEN)
+				{
+					if(us.username != user.username)
+					{
+						us.connection.send("504|"); // si falla, cambiar a: `data.toString()`
+					}
+				}
+			});
+			users.splice(index, 1);
+			//user.connection.send("UserName disconnected: "+user.username);
 		}
 	});
 });

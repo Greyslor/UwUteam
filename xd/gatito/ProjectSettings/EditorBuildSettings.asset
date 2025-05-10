@@ -5,10 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Gato.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 0
     path: Assets/Scenes/Chat.unity
     guid: c44cd2869d3c14c47931fd3d274dfcd2
+  - enabled: 1
+    path: Assets/Scenes/Gato2.unity
+    guid: 795f6ea8ebe8ed14b9081fc12ea87a57
   m_configObjects: {}
